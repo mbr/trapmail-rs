@@ -35,7 +35,7 @@
 //!
 //! ### Example
 //!
-//! ```
+//! ```text
 //! $ trapmail --debug -i -t foo@bar
 //! To: Santa Clause <santa@example.com>
 //! From: Marc <marc@example.com>
@@ -48,7 +48,7 @@
 //!
 //! The resulting mail is (somewhat readable) JSON, but can also be dumped using the cli tool:
 //!
-//! ```
+//! ```text
 //! $ trapmail --dump /tmp/trapmail_1575911147313470_5913_6299.json
 //! Mail sent on 2019-12-09 17:05:47.000313 UTC from PID 6299 (PPID 5913).
 //! CliOptions {
