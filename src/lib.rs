@@ -3,6 +3,20 @@
 //! `trapmail` is a `sendmail` replacement for unit- and integration-testing that captures incoming
 //! mail and stores it on the filesystem. Test cases can inspect the "sent" mails.
 //!
+//! ## Use case
+//!
+//! `trapmail` is intended for black-box testing systems that use the systemwide `sendmail` instance
+//! to send emails. Example:
+//!
+//! 1. `trapmail` is installed and either replaces `sendmail` on the test system/container, or the
+//!    application being tested is configured to use `trapmail` as its `sendmail` binary.
+//! 2. An integration test (written in Rust) triggers various processes that cause the application
+//!    to send mail, which is collected inside `TRAPMAIL_STORE`.
+//! 3. Having access to `TRAPMAIL_STORE` as well, the `trapmail` library can be used inside the
+//!    integration test to check if mail was queued as expected.
+//!
+//! ## CLI
+//!
 //! `trapmail`'s commandline aims to mimick the original `sendmail` arguments, commonly also
 //! implemented by other [MTA](https://en.wikipedia.org/wiki/Message_transfer_agent)s like
 //! Exim or Postfix.
@@ -13,25 +27,39 @@
 //! process' PID, `PID` trapmails `PID` at the time of the call and `TIMESTAMP` a microsecond
 //! accurate timestamp.
 //!
+//! ### Command-line options
+//!
+//! Currently, `trapmail` does not "support" all the same command-line options that sendmail
+//! supports (all options are ignored, but logged). If you run into issues due to an
+//! unsupported option, feel free to open a PR to get it added.
+//!
+//! ### Example
+//!
+//! ```
+//! $ cargo run -- --debug -i -t foo@bar
+//! To: Santa Clause <santa@example.com>
+//! From: Marc <marc@example.com>
+//! Subject: Please remove me from the naughty list.
+//!
+//! Example body.
+//! ^D
+//! Mail written to "/tmp/trapmail_1575910480066629_5913_3215.json"
+//! ```
+//!
+//!
 //! ## Concurrency
 //!
-//! While `trapmail` avoids collisions between stored messages, it cannot guarantee that other
-//! test processes/threads that are running simultaneously do not add to the store as well.
-//! Care must be taken to avoid race conditions, especially when clearing the mail store.
+//! While `trapmail` avoids collisions between stored messages from different processes due to its
+//! naming scheme, it is important to remember that it has no way to access any data of the test
+//! itself (the PPID is from the application-under-tests's PID, not the test binary).
 //!
-//! Providing different `TRAPMAIL_STORE` targets allows for namespacing the data. Otherwise,
-//! depending on the usecase, `PID` and `PPID` may aid in filtering.
+//! Providing different `TRAPMAIL_STORE` targets allows for namespacing the data, but it may not
+//! always be possible to ensure this variable is set per test on a closed system.
 //!
 //! ## API
 //!
 //! The `trapmail` crate comes with a command-line application as well as a library. The
 //! library can be used in tests and applications to access all data that `trapmail` writes.
-//!
-//! ## Command-line options
-//!
-//! Currently, `trapmail` does not "support" all the same command-line options that sendmail
-//! supports (all options are ignored, but logged). If you run into issues due to an
-//! unsupported option, feel free to open a PR to get it added.
 
 use failure::Fail;
 use lazy_static::lazy_static;
@@ -57,7 +85,7 @@ lazy_static! {
 /// Command-line options for the `trapmail` program.
 #[derive(Clone, Debug, Deserialize, Serialize, StructOpt)]
 pub struct CliOptions {
-    /// Non-standard debug output
+    /// Non-standard debug output (outputs trapmail-specific debug info to `stderr`)
     #[structopt(long = "debug")]
     pub debug: bool,
     /// Ignore dots alone on lines by themselves in incoming message
