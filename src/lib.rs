@@ -60,7 +60,7 @@
 //!     ],
 //!     dump: None,
 //! }
-//! To: Santa Clause <santa@example.com>
+//! To: Santa Claus <santa@example.com>
 //! From: Marc <marc@example.com>
 //! Subject: Please remove me from the naughty list.
 //!
