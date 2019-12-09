@@ -332,7 +332,7 @@ impl MailStore {
                 .expect("OsString to String conversion should not fail for prefiltered filename.");
 
             if FILENAME_RE.is_match(&filename) {
-                paths.push(filename);
+                paths.push(self.root.join(filename));
             }
         }
 
