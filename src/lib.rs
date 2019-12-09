@@ -122,6 +122,32 @@ pub enum Error {
 
 type Result<T> = ::std::result::Result<T, Error>;
 
+/// An email body.
+///
+/// Mail bodies *should* be 7-bit ASCII (which is a subset of UTF-8), but there is no guarantee that
+/// clients/callers send valid data.
+///
+/// Upon creation, the body is parsed and stored as one of either variant, this allows the JSON
+/// serialization to be ideally human-readable, if valid UTF8 is used (i.e. one can have a quick
+/// look at mail contents in a text editor).
+#[derive(Debug, Deserialize, Serialize)]
+pub enum MailBody {
+    /// A valid UTF8-formatted mail.
+    Utf8(String),
+    /// A mail containing non-UTF8 characters.
+    Invalid(#[serde(with = "serde_bytes")] Vec<u8>),
+}
+
+impl MailBody {
+    /// Create new `MailBody` from raw input bytes.
+    fn from_raw(raw_body: Vec<u8>) -> Self {
+        match String::from_utf8(raw_body) {
+            Ok(s) => MailBody::Utf8(s),
+            Err(e) => MailBody::Invalid(e.into_bytes()),
+        }
+    }
+}
+
 /// A "sent" mail.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Mail {
@@ -134,8 +160,7 @@ pub struct Mail {
     #[serde(with = "serde_pid")]
     pub ppid: Pid,
     /// The `trapmail` call's raw body.
-    #[serde(with = "serde_bytes")]
-    pub raw_body: Vec<u8>,
+    pub body: MailBody,
     /// A microsecond-resolution UNIX timestamp of when the mail arrived.
     pub timestamp_us: u128,
 }
@@ -161,7 +186,7 @@ impl Mail {
 
         Mail {
             cli_options,
-            raw_body,
+            body: MailBody::from_raw(raw_body),
             pid: nix::unistd::Pid::this(),
             ppid: nix::unistd::Pid::parent(),
             timestamp_us,

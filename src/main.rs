@@ -9,8 +9,6 @@ fn main() -> Result<(), failure::Error> {
     // If given the `--dump` flag, we ignore everything and just dump the mail.
     if let Some(target) = opt.dump {
         let mail = trapmail::Mail::load(target)?;
-        // TODO: Try to format U8 a little better here, possibly using FmtU8
-        //       `byte_string`.
         println!("{:#?}", mail);
         return Ok(());
     }
