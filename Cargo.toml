@@ -1,0 +1,18 @@
+[package]
+name = "trapmail"
+version = "0.1.0"
+authors = ["Marc Brinkmann <git@git.marcbrinkmann.de>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "A command-line replacement for sendmail that stores mail. Useful for integration tests."
+
+[dependencies]
+structopt = "0.2.16"
+failure = "0.1.5"
+serde = "1.0.92"
+serde_derive = "1.0.92"
+nix = "0.14.1"
+serde_json = "1.0.39"
+serde_bytes = "0.11.1"
+regex = "1.1.7"
+lazy_static = "1.3.0"
