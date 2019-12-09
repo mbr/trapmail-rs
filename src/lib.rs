@@ -135,6 +135,7 @@ pub struct CliOptions {
     pub dump: Option<path::PathBuf>,
 }
 
+/// A trapmail error.
 #[derive(Debug, Fail)]
 pub enum Error {
     /// Failure to store email in store.
