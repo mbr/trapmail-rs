@@ -5,6 +5,7 @@ authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "A command-line replacement for sendmail that stores mail. Useful for integration tests."
+documentation = "https://docs.rs/trapmail"
 
 [dependencies]
 structopt = "0.2.16"
