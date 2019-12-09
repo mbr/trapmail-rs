@@ -67,7 +67,6 @@
 //! Example body.
 //! ```
 //!
-//!
 //! ## Concurrency
 //!
 //! While `trapmail` avoids collisions between stored messages from different processes due to its
@@ -81,7 +80,20 @@
 //!
 //! The `trapmail` crate comes with a command-line application as well as a library. The
 //! library can be used in tests and applications to access all data that `trapmail` writes.
-
+//!
+//! A minimal example to read the contents of the current trapmail folder:
+//!
+//! ```rust,no_exec
+//! use trapmail::MailStore;
+//!
+//! let store = MailStore::new();
+//!
+//! // Load mail from the default mail directory.c
+//! for load_result in store.iter_mails().expect("could not open mail store") {
+//!     let mail = load_result.expect("could not load mail from file");
+//!     println!("{}", mail);
+//! }
+//! ```
 use failure::Fail;
 use lazy_static::lazy_static;
 use nix::unistd::Pid;
