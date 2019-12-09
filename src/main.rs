@@ -9,7 +9,7 @@ fn main() -> Result<(), failure::Error> {
     // If given the `--dump` flag, we ignore everything and just dump the mail.
     if let Some(target) = opt.dump {
         let mail = trapmail::Mail::load(target)?;
-        println!("{:#?}", mail);
+        println!("{}", mail);
         return Ok(());
     }
 

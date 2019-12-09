@@ -36,14 +36,35 @@
 //! ### Example
 //!
 //! ```
-//! $ cargo run -- --debug -i -t foo@bar
+//! $ trapmail --debug -i -t foo@bar
 //! To: Santa Clause <santa@example.com>
 //! From: Marc <marc@example.com>
 //! Subject: Please remove me from the naughty list.
 //!
 //! Example body.
 //! ^D
-//! Mail written to "/tmp/trapmail_1575910480066629_5913_3215.json"
+//! Mail written to "/tmp/trapmail_1575911147313470_5913_6299.json"
+//! ```
+//!
+//! The resulting mail is (somewhat readable) JSON, but can also be dumped using the cli tool:
+//!
+//! ```
+//! $ trapmail --dump /tmp/trapmail_1575911147313470_5913_6299.json
+//! Mail sent on 2019-12-09 17:05:47.000313 UTC from PID 6299 (PPID 5913).
+//! CliOptions {
+//!     debug: true,
+//!     ignore_dots: true,
+//!     inline_recipients: true,
+//!     addresses: [
+//!         "foo@bar",
+//!     ],
+//!     dump: None,
+//! }
+//! To: Santa Clause <santa@example.com>
+//! From: Marc <marc@example.com>
+//! Subject: Please remove me from the naughty list.
+//!
+//! Example body.
 //! ```
 //!
 //!
@@ -66,7 +87,8 @@ use lazy_static::lazy_static;
 use nix::unistd::Pid;
 use regex::Regex;
 use serde_derive::{Deserialize, Serialize};
-use std::{env, fs, io, path, thread, time};
+use std::convert::TryInto;
+use std::{env, fmt, fs, io, path, thread, time};
 use structopt::StructOpt;
 
 pub mod serde_pid;
@@ -148,6 +170,15 @@ impl MailBody {
     }
 }
 
+impl fmt::Display for MailBody {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MailBody::Utf8(s) => write!(f, "{}", s),
+            MailBody::Invalid(raw) => write!(f, "[invalid UTF-8]{}", String::from_utf8_lossy(&raw)),
+        }
+    }
+}
+
 /// A "sent" mail.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Mail {
@@ -206,6 +237,36 @@ impl Mail {
     pub fn load<P: AsRef<path::Path>>(source: P) -> Result<Self> {
         serde_json::from_reader(fs::File::open(source).map_err(Error::Load)?)
             .map_err(Error::MailDeserialization)
+    }
+}
+
+/// Convert microsecond timestamp to `chrono::NaiveDateTime`.
+///
+/// Returns an error if input data is out-of-range for the underlying type.
+fn us_to_datetime(
+    timestamp_us: u128,
+) -> ::core::result::Result<chrono::NaiveDateTime, core::num::TryFromIntError> {
+    Ok(chrono::NaiveDateTime::from_timestamp(
+        (timestamp_us / 1_000_000).try_into()?,
+        (timestamp_us % 1_000_000).try_into()?,
+    ))
+}
+
+impl fmt::Display for Mail {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let formatted_timestamp = if let Ok(dt) = us_to_datetime(self.timestamp_us) {
+            dt.format("%Y-%m-%d %H:%M:%S%.6f").to_string()
+        } else {
+            format!("[cannot convert {} to timestamp]", self.timestamp_us)
+        };
+
+        write!(
+            f,
+            "Mail sent on {} UTC from PID {} (PPID {}).\n\
+             {:#?}\n\
+             {}",
+            formatted_timestamp, self.pid, self.ppid, self.cli_options, self.body
+        )
     }
 }
 
