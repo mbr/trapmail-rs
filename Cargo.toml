@@ -1,7 +1,7 @@
 [package]
 name = "trapmail"
 version = "0.1.0"
-authors = ["Marc Brinkmann <git@git.marcbrinkmann.de>"]
+authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "A command-line replacement for sendmail that stores mail. Useful for integration tests."
