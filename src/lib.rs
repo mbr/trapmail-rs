@@ -83,7 +83,7 @@
 //!
 //! A minimal example to read the contents of the current trapmail folder:
 //!
-//! ```rust,no_exec
+//! ```no_exec
 //! use trapmail::MailStore;
 //!
 //! let store = MailStore::new();
