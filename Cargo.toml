@@ -7,6 +7,7 @@ license = "MIT OR Apache-2.0"
 description = "A command-line replacement for sendmail that stores mail. Useful for integration tests."
 documentation = "https://docs.rs/trapmail"
 repository = "https://github.com/mbr/trapmail-rs"
+categories = ["email", "development-tools::testing"]
 
 [dependencies]
 structopt = "0.2.16"
