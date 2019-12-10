@@ -94,6 +94,10 @@
 //!     println!("{}", mail);
 //! }
 //! ```
+pub mod serde_pid;
+mod util;
+
+use crate::util::FlattenResultsIter;
 use failure::Fail;
 use lazy_static::lazy_static;
 use nix::unistd::Pid;
@@ -102,8 +106,6 @@ use serde_derive::{Deserialize, Serialize};
 use std::convert::TryInto;
 use std::{env, fmt, fs, io, path, thread, time};
 use structopt::StructOpt;
-
-pub mod serde_pid;
 
 /// Name of the environment variable indicating where to store mail.
 pub const ENV_MAIL_STORE_PATH: &str = "TRAPMAIL_STORE";
@@ -154,8 +156,8 @@ pub enum Error {
     #[fail(display = "Could not serialize mail: {}", 0)]
     MailSerialization(serde_json::Error),
     /// Failure to enumerate files in directory
-    #[fail(display = "Could not open storage directory for reading: {}", 0)]
-    DirEnumeration(io::Error),
+    #[fail(display = "Could enumerate storage directory: {}", 0)]
+    DirEnumeration(util::DirReadError),
     /// Failure to load email from store.
     #[fail(display = "Could not load mail: {}", 0)]
     Load(io::Error),
@@ -331,29 +333,11 @@ impl MailStore {
     /// Iterate over all mails in storage.
     ///
     /// Mails are ordered by timestamp.
-    pub fn iter_mails(&self) -> Result<impl Iterator<Item = Result<Mail>>> {
-        // Use non-functional style here, as the nested `Result`s otherwise get
-        // a bit hairy.
-        let mut paths = Vec::new();
-
-        // We read the contents of the entire directory first for sorting.
-        for dir_result in fs::read_dir(&self.root).map_err(Error::DirEnumeration)? {
-            let dir_entry = dir_result.map_err(Error::DirEnumeration)?;
-            let filename = dir_entry
-                .file_name()
-                .into_string()
-                .expect("OsString to String conversion should not fail for prefiltered filename.");
-
-            if FILENAME_RE.is_match(&filename) {
-                paths.push(self.root.join(filename));
-            }
-        }
-
-        // All files are named `trapmail_TIMESTAMP_..` and thus will be sorted
-        // correctly, even when sorted by filename.
-        paths.sort();
-
-        Ok(paths.into_iter().map(Mail::load))
+    pub fn iter_mails(&self) -> impl Iterator<Item = Result<Mail>> {
+        util::read_dir_matching(&self.root, &FILENAME_RE)
+            .map_err(Error::DirEnumeration)
+            .map(|paths| paths.into_iter().map(Mail::load))
+            .flatten_results()
     }
 }
 
