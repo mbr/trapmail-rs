@@ -143,7 +143,7 @@ pub struct CliOptions {
     #[structopt(short = "f")]
     pub sender: String,
     /// The mail store path. Overrides the eponymous environment variable.
-    #[structopt(long = "store_path")]
+    #[structopt(long = "store-path")]
     pub store_path: Option<String>,
 }
 
