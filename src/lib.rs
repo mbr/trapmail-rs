@@ -184,6 +184,7 @@ pub enum MailBody {
 
 impl MailBody {
     /// Create new `MailBody` from raw input bytes.
+    #[inline]
     fn from_raw(raw_body: Vec<u8>) -> Self {
         match String::from_utf8(raw_body) {
             Ok(s) => MailBody::Utf8(s),
@@ -303,6 +304,7 @@ impl MailStore {
     /// Construct a new `MailStore`.
     ///
     /// The path will be set from the environment or use a default, if not set.
+    #[inline]
     pub fn new() -> Self {
         MailStore::with_root(
             env::var(ENV_MAIL_STORE_PATH).unwrap_or(DEFAULT_MAIL_STORE_PATH.to_owned()),
@@ -310,6 +312,7 @@ impl MailStore {
     }
 
     /// Construct a new `MailStore` with given path.
+    #[inline]
     pub fn with_root<P: Into<path::PathBuf>>(root: P) -> Self {
         MailStore { root: root.into() }
     }
