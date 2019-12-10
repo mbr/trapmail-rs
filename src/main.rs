@@ -2,6 +2,7 @@ use failure::bail;
 use std::io;
 use std::io::Read;
 use structopt::StructOpt;
+use trapmail::MailStore;
 
 fn main() -> Result<(), failure::Error> {
     let opt = trapmail::CliOptions::from_args();
@@ -21,7 +22,11 @@ fn main() -> Result<(), failure::Error> {
         bail!("inline recipients (`-t`) was not set, but the reverse is not supported");
     }
 
-    let store = trapmail::MailStore::new();
+    let store = opt
+        .store_path
+        .as_ref()
+        .map(MailStore::with_root)
+        .unwrap_or_else(MailStore::new);
 
     // Read stdin as the mail and store it. All the parsing is handled by the
     // process running the test cases.

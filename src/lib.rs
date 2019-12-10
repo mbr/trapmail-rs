@@ -86,9 +86,9 @@
 //! ```no_exec
 //! use trapmail::MailStore;
 //!
+//! // Load mail from the default mail directory.
 //! let store = MailStore::new();
 //!
-//! // Load mail from the default mail directory.c
 //! for load_result in store.iter_mails().expect("could not open mail store") {
 //!     let mail = load_result.expect("could not load mail from file");
 //!     println!("{}", mail);
@@ -300,18 +300,18 @@ pub struct MailStore {
 }
 
 impl MailStore {
-    /// Construct new `MailStore` with path from environment.
+    /// Construct a new `MailStore`.
+    ///
+    /// The path will be set from the environment or use a default, if not set.
     pub fn new() -> Self {
-        Self::with_root(
-            env::var(ENV_MAIL_STORE_PATH)
-                .unwrap_or(DEFAULT_MAIL_STORE_PATH.to_owned())
-                .into(),
+        MailStore::with_root(
+            env::var(ENV_MAIL_STORE_PATH).unwrap_or(DEFAULT_MAIL_STORE_PATH.to_owned()),
         )
     }
 
-    /// Construct new `MailStore` with explicit path.
-    pub fn with_root(root: path::PathBuf) -> Self {
-        MailStore { root }
+    /// Construct a new `MailStore` with given path.
+    pub fn with_root<P: Into<path::PathBuf>>(root: P) -> Self {
+        MailStore { root: root.into() }
     }
 
     /// Add a mail to the `MailStore`.
@@ -351,5 +351,11 @@ impl MailStore {
         paths.sort();
 
         Ok(paths.into_iter().map(Mail::load))
+    }
+}
+
+impl Default for MailStore {
+    fn default() -> Self {
+        Self::new()
     }
 }
