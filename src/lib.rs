@@ -98,7 +98,7 @@ pub mod serde_pid;
 mod util;
 
 use crate::util::FlattenResultsIter;
-use failure::Fail;
+use displaydoc::Display;
 use lazy_static::lazy_static;
 use nix::unistd::Pid;
 use regex::Regex;
@@ -106,6 +106,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::convert::TryInto;
 use std::{env, fmt, fs, io, path, thread, time};
 use structopt::StructOpt;
+use thiserror::Error;
 
 /// Name of the environment variable indicating where to store mail.
 pub const ENV_MAIL_STORE_PATH: &str = "TRAPMAIL_STORE";
@@ -147,22 +148,17 @@ pub struct CliOptions {
 }
 
 /// A trapmail error.
-#[derive(Debug, Fail)]
+#[derive(Debug, Display, Error)]
 pub enum Error {
-    /// Failure to store email in store.
-    #[fail(display = "Could not store mail: {}", 0)]
+    /// "Could not store mail: {0}
     Store(io::Error),
-    /// Failure to serialize email to store.
-    #[fail(display = "Could not serialize mail: {}", 0)]
+    /// "Could not serialize mail: {0}
     MailSerialization(serde_json::Error),
-    /// Failure to enumerate files in directory
-    #[fail(display = "Could enumerate storage directory: {}", 0)]
+    /// "Could enumerate storage directory: {0}
     DirEnumeration(util::DirReadError),
-    /// Failure to load email from store.
-    #[fail(display = "Could not load mail: {}", 0)]
+    /// "Could not load mail: {0}
     Load(io::Error),
-    /// Failure to deserialize email from store.
-    #[fail(display = "Could not deserialize mail: {}", 0)]
+    /// "Could not deserialize mail: {0}
     MailDeserialization(serde_json::Error),
 }
 

@@ -1,10 +1,10 @@
-use failure::bail;
+use anyhow::bail;
 use std::io;
 use std::io::Read;
 use structopt::StructOpt;
 use trapmail::MailStore;
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> Result<(), anyhow::Error> {
     let opt = trapmail::CliOptions::from_args();
 
     // If given the `--dump` flag, we ignore everything and just dump the mail.
