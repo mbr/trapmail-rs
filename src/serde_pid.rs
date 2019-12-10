@@ -4,6 +4,7 @@ use nix::unistd::Pid;
 use serde::{Deserialize, Deserializer, Serializer};
 
 /// Serialization function, to be used with `serialize_with`.
+#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn serialize<S>(pid: &Pid, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,

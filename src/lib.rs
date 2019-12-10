@@ -305,7 +305,7 @@ impl MailStore {
     #[inline]
     pub fn new() -> Self {
         MailStore::with_root(
-            env::var(ENV_MAIL_STORE_PATH).unwrap_or(DEFAULT_MAIL_STORE_PATH.to_owned()),
+            env::var(ENV_MAIL_STORE_PATH).unwrap_or_else(|_| DEFAULT_MAIL_STORE_PATH.to_owned()),
         )
     }
 
