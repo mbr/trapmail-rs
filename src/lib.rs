@@ -133,6 +133,15 @@ pub struct CliOptions {
     /// Ignore everything else and dump the contents of an email file instead.
     #[structopt(long = "dump")]
     pub dump: Option<path::PathBuf>,
+    /// Set option option to the specified value. (e.g. `-O foo=bar`)
+    #[structopt(short = "O")]
+    pub option: Vec<String>,
+    /// Sets the name of the ''from'' person (i.e., the envelope sender of the mail).
+    #[structopt(short = "f")]
+    pub sender: String,
+    /// The mail store path. Overrides the eponymous environment variable.
+    #[structopt(long = "store_path")]
+    pub store_path: Option<String>,
 }
 
 /// A trapmail error.
