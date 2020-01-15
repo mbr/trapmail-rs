@@ -105,7 +105,7 @@ use regex::Regex;
 use serde_derive::{Deserialize, Serialize};
 use std::convert::TryInto;
 use std::{env, fmt, fs, io, path, thread, time};
-use structopt::StructOpt;
+use structopt::{clap, StructOpt};
 use thiserror::Error;
 
 /// Name of the environment variable indicating where to store mail.
@@ -131,8 +131,8 @@ pub struct CliOptions {
     /// Read message for recipient list
     #[structopt(short = "t")]
     pub inline_recipients: bool,
-    /// Addresses to send mail to
-    pub addresses: Vec<String>,
+    /// Additional command line options
+    pub options: Vec<String>,
     /// Ignore everything else and dump the contents of an email file instead.
     #[structopt(long = "dump")]
     pub dump: Option<path::PathBuf>,
@@ -145,6 +145,14 @@ pub struct CliOptions {
     /// The mail store path. Overrides the eponymous environment variable.
     #[structopt(long = "store-path")]
     pub store_path: Option<String>,
+}
+
+impl CliOptions {
+    /// Get CLI options from actual command line.
+    pub fn from_args() -> Self {
+        let app = Self::clap().setting(clap::AppSettings::AllowLeadingHyphen);
+        Self::from_clap(&app.get_matches())
+    }
 }
 
 /// A trapmail error.

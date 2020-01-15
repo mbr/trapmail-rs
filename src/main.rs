@@ -1,7 +1,6 @@
 use anyhow::bail;
 use std::io;
 use std::io::Read;
-use structopt::StructOpt;
 use trapmail::MailStore;
 
 fn main() -> Result<(), anyhow::Error> {
