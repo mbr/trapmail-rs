@@ -141,7 +141,7 @@ pub struct CliOptions {
     pub option: Vec<String>,
     /// Sets the name of the ''from'' person (i.e., the envelope sender of the mail).
     #[structopt(short = "f")]
-    pub sender: String,
+    pub sender: Option<String>,
     /// The mail store path. Overrides the eponymous environment variable.
     #[structopt(long = "store-path")]
     pub store_path: Option<String>,
